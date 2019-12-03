@@ -24,6 +24,7 @@ SEPARATOR_STR = "=========="
 def is_separator(line):
     return line.startswith(SEPARATOR_STR)
 
+
 def seg_count(path):
     # starts at -1 since there's both begin/end separator
     count = -1
@@ -50,7 +51,7 @@ def load_vectors(vecs_path=VECTORS_PATH):
             try:
                 v = np.array([float(_) for _ in elements[1:]])
             except Exception as e:
-                print("Excluded #%d, %s" % (count, str(e))) 
+                print("Excluded #%d, %s" % (count, str(e)))
                 continue
 
             words[word] = count
@@ -59,7 +60,7 @@ def load_vectors(vecs_path=VECTORS_PATH):
     # vecs = np.load("/home/aaa244/storage/arxiv_glove/bigrun/data/mats/vecs.npy")
     # words = np.load("/home/aaa244/storage/arxiv_glove/bigrun/data/mats/vocab.npy")
 
-    word_lookup = {w:c for c,w in enumerate(words) }
+    word_lookup = {w: c for c, w in enumerate(words)}
     return vecs, word_lookup
 
 
@@ -72,35 +73,40 @@ def run_folder(root_path, n_thread):
 
     vecs, word_lookup = load_vectors()
     args_list = [(src_path, vecs, word_lookup,)
-                  for src_path in sources]
+                 for src_path in sources]
     with Pool(processes=n_thread) as pool:
         pool.map(run_path_args, args_list)
+
 
 def run_path_args(args):
     return run_path(*args)
 
+
 def run_path(src_path, vecs, word_lookup):
     ref_path = src_path.replace(src_ext, ref_ext)
     out_path = src_path.replace(src_ext, alemi_ext)
-    
+
     if os.path.exists(out_path):
         print("Aborting, file exists: '%s'" % out_path)
-        return 
+        return
     seg_n = seg_count(ref_path)
 
     k = seg_n - 1
     do_run(k, src_path, out_path, vecs, word_lookup)
 
+
 def do_run(K, infile, out_path, vecs, word_lookup):
-    
-    with open(infile,"r") as f:
+
+    with open(infile, "r") as f:
         txt = f.read()
 
-    punctuation_pat = re.compile(r"""([!"#$%&\'()*+,-./:;<=>?@[\\\]^_`{|}~])""")
+    punctuation_pat = re.compile(
+        r"""([!"#$%&\'()*+,-./:;<=>?@[\\\]^_`{|}~])""")
     hyphenline_pat = re.compile(r"-\s*\n\s*")
     multiwhite_pat = re.compile(r"\s+")
     cid_pat = re.compile(r"\(cid:\d+\)")
     nonlet = re.compile(r"([^A-Za-z0-9 ])")
+
     def clean_text(txt):
         #txt = txt.decode("utf-8")
         txt = txt
@@ -110,14 +116,14 @@ def do_run(K, infile, out_path, vecs, word_lookup):
         txt = hyphenline_pat.sub("", txt)
         # print punctuation_pat.findall(txt)
         txt = punctuation_pat.sub(r" \1 ", txt)
-        txt = re.sub("\n"," NL ", txt)
+        txt = re.sub("\n", " NL ", txt)
         txt = nonlet.sub(r" \1 ", txt)
 
         # txt = punctuation_pat.sub(r"", txt)
         # txt = nonlet.sub(r"", txt)
 
         txt = multiwhite_pat.sub(" ", txt)
-        txt = txt #.encode('utf-8')
+        txt = txt  # .encode('utf-8')
         return "".join(["START ", txt.strip(), " END"])
 
     txt = clean_text(txt).split()
@@ -128,20 +134,20 @@ def do_run(K, infile, out_path, vecs, word_lookup):
 
     mapper = {}
     count = 0
-    for i,word in enumerate(txt):
+    for i, word in enumerate(txt):
         if word in word_lookup:
             mapper[i] = count
             count += 1
-            X.append( vecs[word_lookup[word]] )
+            X.append(vecs[word_lookup[word]])
 
-    mapperr = { v:k for k,v in list(mapper.items()) }
+    mapperr = {v: k for k, v in list(mapper.items())}
 
     X = np.array(X)
     print(("X length:", X.shape[0]))
 
     sig = splitters.gensig_model(X)
     print("Splitting...")
-    splits,e = splitters.greedysplit(X.shape[0], K, sig)
+    splits, e = splitters.greedysplit(X.shape[0], K, sig)
     print(splits)
     print("Refining...")
     splitsr = splitters.refine(splits, sig, 20)
@@ -149,22 +155,22 @@ def do_run(K, infile, out_path, vecs, word_lookup):
 
     print("Printing refined splits... ")
 
-    for i,s in enumerate(splitsr[:-1]):
+    for i, s in enumerate(splitsr[:-1]):
         k = mapperr[s]
         print()
-        print((i,s))
+        print((i, s))
         print((" ".join(txt[k-100:k]), "\n\n", " ".join(txt[k:k+100])))
 
-    with open(out_path,"w") as f:
+    with open(out_path, "w") as f:
         prev = 0
         for s in splitsr:
-            k = mapperr.get(s,len(txt))
-            f.write(" ".join(txt[prev:k]).replace("NL","\n"))
+            k = mapperr.get(s, len(txt))
+            f.write(" ".join(txt[prev:k]).replace("NL", "\n"))
             f.write("\n%s\n" % SEPARATOR_STR)
             prev = k
 
-
     print("Done")
+
 
 if __name__ == "__main__":
     import argparse
@@ -174,7 +180,7 @@ if __name__ == "__main__":
     # parser.add_argument("infile")
     parser.add_argument("root")
     parser.add_argument("-n_thread", type=int, default=4)
-    # 
+    #
     args = parser.parse_args()
-    
+
     run_folder(args.root, n_thread=args.n_thread)
