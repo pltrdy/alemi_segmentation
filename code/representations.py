@@ -19,7 +19,7 @@ def tf_sents(doc):
                 wordcounter[word] += 1
 
             vec = np.zeros(len(words))
-            for word,count in wordcounter.iteritems():
+            for word,count in wordcounter.items():
                 if word in words:
                     vec[word_pk[word]] += count
             vecs.append(vec)

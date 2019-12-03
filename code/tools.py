@@ -2,13 +2,15 @@
 A set of useful tools for handing the text segmentation tasks.
 """
 import numpy as np
-from itertools import chain, tee, izip
+from itertools import chain, tee
 # from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 
 stopword_set = set()
 
-with open("/home/aaa244/storage/segmentation/data/STOPWORD.list") as f:
+
+stopword_path = "/home/pltrdy/autoalign/graphseg/source/res/stopwords-fr.txt"
+with open(stopword_path) as f:
     for line in f:
         stopword_set.add(line.strip())
 # add punctuation
@@ -62,21 +64,21 @@ def arx_loader(num):
 def allchoi(set, *args, **kwargs):
     if set=="3-5":
         for a in [1,2]:
-            for i in xrange(50):
+            for i in range(50):
                 yield choi_loader(a,"3-5",i, *args, **kwargs)
     if set=="6-8":
         for a in [1,2]:
-            for i in xrange(50):
+            for i in range(50):
                 yield choi_loader(a,"6-8",i, *args, **kwargs)
     if set=="9-11":
         for a in [1,2]:
-            for i in xrange(50):
+            for i in range(50):
                 yield choi_loader(a,"9-11",i, *args, **kwargs)
     if set=="3-11":
         for a in [1,2]:
-            for i in xrange(50):
+            for i in range(50):
                 yield choi_loader(a,"3-11",i, *args, **kwargs)
-        for i in xrange(300):
+        for i in range(300):
             yield choi_loader(3,"3-11",i, *args, **kwargs)
 
 def collapse(doc):
@@ -132,7 +134,7 @@ def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = tee(iterable)
     next(b, None)
-    return izip(a, b)
+    return zip(a, b)
 
 
 def seg_iter(splits):
@@ -167,7 +169,7 @@ def score_wd(hyp, ref, k=None):
 
     score = 0.0
     tot = 0.0
-    for i in xrange(length - k):
+    for i in range(length - k):
         bref = ((ref > i) & (ref <= i+k)).sum()
         bhyp = ((hyp > i) & (hyp <= i+k)).sum()
         score += 1.0*(np.abs(bref-bhyp) > 0)
