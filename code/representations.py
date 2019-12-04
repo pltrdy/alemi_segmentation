@@ -1,4 +1,4 @@
-""" 
+"""
 Code for figuring out various vector representions of documents
 """
 
@@ -78,7 +78,7 @@ def vec_words(doc, word_lookup, wordreps):
 def vectop_sents(doc, word_lookup, wordreps):
     """ Create a vector representation of the document """
     vecs = []
-    N = wordreps.max()+1
+    N = wordreps.max() + 1
     for part in doc:
         for sent in part:
             sentvec = np.zeros(N)
@@ -101,7 +101,7 @@ def vecdf_sents(doc, word_lookup, wordreps, dfcounter):
                 pk = word_lookup.get(word, -1)
                 if pk >= 0:
                     wordvecs.append(
-                        np.log(500./(dfcounter.get(word, 1.0)+0.0))*wordreps[pk])
+                        np.log(500. / (dfcounter.get(word, 1.0) + 0.0)) * wordreps[pk])
             vecs.append(np.mean(wordvecs, 0))
 
     return np.array(vecs)
@@ -116,7 +116,7 @@ def vecdf_words(doc, word_lookup, wordreps, dfcounter):
                 pk = word_lookup.get(word, -1)
                 if pk >= 0:
                     vecs.append(
-                        np.log(500./(dfcounter.get(word, 1.0)+0.0))*wordreps[pk])
+                        np.log(500. / (dfcounter.get(word, 1.0) + 0.0)) * wordreps[pk])
                 else:
                     vecs.append(np.zeros(wordreps.shape[1]))
     return np.array(vecs)

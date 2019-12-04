@@ -123,26 +123,26 @@ def refsplit(doc):
     """ Get the reference splitting for the document """
     middle = np.cumsum(
         [1] + [sum(1 for sent in part for word in sent) for part in doc])
-    return (middle[1:-1]-1).tolist() + [middle[-1]-1]
+    return (middle[1:-1] - 1).tolist() + [middle[-1] - 1]
 
 
 def refsplit_sent(doc):
     """ Get the reference splitting for the sentence representation """
     middle = np.cumsum([1] + [sum(1 for sent in part) for part in doc])
-    return (middle[1:-1]-1).tolist() + [middle[-1]-1]
+    return (middle[1:-1] - 1).tolist() + [middle[-1] - 1]
 
 
 # A testing document in the same structure as a choi doc
-testdoc = [["this is the first sentence".split()]*5,
-           ["second sentence same as the first".split()]*3,
-           ["the blue fish went to the market".split()]*4,
-           ["once upon a midnight dreary with my pack".split()]*5,
-           ["while i pondered weak and weary".split()]*3,
-           ["one fish two fish three fish blue fish".split()]*5,
-           ["pack it up pack it in let me begin".split()]*3,
-           ["i came to win battle me that is a sin to begin".split()]*5,
-           ["and think about how ravens and writing desks".split()]*4,
-           ["other people are people too not ravens or fish".split()]*3]
+testdoc = [["this is the first sentence".split()] * 5,
+           ["second sentence same as the first".split()] * 3,
+           ["the blue fish went to the market".split()] * 4,
+           ["once upon a midnight dreary with my pack".split()] * 5,
+           ["while i pondered weak and weary".split()] * 3,
+           ["one fish two fish three fish blue fish".split()] * 5,
+           ["pack it up pack it in let me begin".split()] * 3,
+           ["i came to win battle me that is a sin to begin".split()] * 5,
+           ["and think about how ravens and writing desks".split()] * 4,
+           ["other people are people too not ravens or fish".split()] * 3]
 
 # Utility
 
@@ -159,7 +159,7 @@ def seg_iter(splits):
 
 
 def length_iter(splits):
-    return ((b-a) for (a, b) in seg_iter(splits))
+    return ((b - a) for (a, b) in seg_iter(splits))
 
 # Scoring functions
 
@@ -170,19 +170,19 @@ def xnor(a, b): return (a and b) or (not a and not b)
 def score(hyp, ref, k=None):
     """ The Pk metric from Beeferman """
     # if k is undefined, use half the mean segment size
-    k = k or int(round(0.5*ref[-1]/len(ref)))-1
+    k = k or int(round(0.5 * ref[-1] / len(ref))) - 1
 
     length = ref[-1]
     probeinds = np.arange(length - k)
-    dref = np.digitize(probeinds, ref) == np.digitize(probeinds+k, ref)
-    dhyp = np.digitize(probeinds, hyp) == np.digitize(probeinds+k, hyp)
+    dref = np.digitize(probeinds, ref) == np.digitize(probeinds + k, ref)
+    dhyp = np.digitize(probeinds, hyp) == np.digitize(probeinds + k, hyp)
 
     return (dref ^ dhyp).mean()
 
 
 def score_wd(hyp, ref, k=None):
     """ The window diff metric of Pevzner """
-    k = k or int(round(0.5*ref[-1]/len(ref)))-1
+    k = k or int(round(0.5 * ref[-1] / len(ref))) - 1
 
     length = ref[-1]
     hyp = np.asarray(hyp)
@@ -191,8 +191,8 @@ def score_wd(hyp, ref, k=None):
     score = 0.0
     tot = 0.0
     for i in range(length - k):
-        bref = ((ref > i) & (ref <= i+k)).sum()
-        bhyp = ((hyp > i) & (hyp <= i+k)).sum()
-        score += 1.0*(np.abs(bref-bhyp) > 0)
+        bref = ((ref > i) & (ref <= i + k)).sum()
+        bhyp = ((hyp > i) & (hyp <= i + k)).sum()
+        score += 1.0 * (np.abs(bref - bhyp) > 0)
         tot += 1.0
-    return score/tot
+    return score / tot

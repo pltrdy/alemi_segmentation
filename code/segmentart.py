@@ -159,7 +159,7 @@ def do_run(K, infile, out_path, vecs, word_lookup):
         k = mapperr[s]
         print()
         print((i, s))
-        print((" ".join(txt[k-100:k]), "\n\n", " ".join(txt[k:k+100])))
+        print((" ".join(txt[k - 100:k]), "\n\n", " ".join(txt[k:k + 100])))
 
     with open(out_path, "w") as f:
         prev = 0
